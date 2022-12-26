@@ -1,3 +1,5 @@
+import logging
+from pprint import pformat
 from typing import List
 
 import openai
@@ -18,6 +20,7 @@ def read_root():
 
 @app.post("/embeddings/")
 async def get_embeddings(embeddings_input: EmbeddingsInput):
+    logging.info("text(s) to embed:" + '\n' + pformat(embeddings_input.input))
     return {
         "data": openai.Embedding.create(
             input=embeddings_input.input, model=CONFIG["model"]["embeddings_model"]

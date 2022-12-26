@@ -133,7 +133,8 @@ from utils import CONFIG
 sample_var = CONFIG["sample_key"]["sample_var"]
 ```
 
-## Deployment
+## ToDo
 
-TODO
-
+- add text completion endpoint
+- add deployment code using docker
+    * add launch guides to readme

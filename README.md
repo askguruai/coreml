@@ -18,77 +18,77 @@ Creates an embedding vector representing the input text.
 #### Examples
 
 <details>
-    <summary>Create an embedding for single text.</summary>
+<summary>Create an embedding for single text.</summary>
 
-    ```bash
-    curl -X 'POST' \
-      'http://78.141.213.164:5555/embeddings/' \
-      -H 'accept: application/json' \
-      -H 'Content-Type: application/json' \
-      -d '{
-      "input": "vp rnd"
-    }'
-    ```
+```bash
+curl -X 'POST' \
+  'http://78.141.213.164:5555/embeddings/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "input": "vp rnd"
+}'
+```
 
-    Response:
-    ```json
+Response:
+```json
+{
+  "data": [
     {
-      "data": [
-        {
-          "object": "embedding",
-          "index": 0,
-          "embedding": [
-            -0.004258352797478437,
-            -0.024816041812300682,
-            ...
-            0.0022093546576797962
-          ]
-        }
+      "object": "embedding",
+      "index": 0,
+      "embedding": [
+        -0.004258352797478437,
+        -0.024816041812300682,
+        ...
+        0.0022093546576797962
       ]
     }
-    ```
+  ]
+}
+```
 </details>
 
 <details>
-    <summary>Create embeddings for multiple texts.</summary>
+<summary>Create embeddings for multiple texts.</summary>
 
-    ```bash
-    curl -X 'POST' \
-      'http://78.141.213.164:5555/embeddings/' \
-      -H 'accept: application/json' \
-      -H 'Content-Type: application/json' \
-      -d '{
-      "input": ["terkom ceo", "Андрей Николаевич Терехов — доктор физико-математических наук, профессор, заведующий кафедрой СП СПбГУ."]
-    }'
-    ```
+```bash
+curl -X 'POST' \
+  'http://78.141.213.164:5555/embeddings/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "input": ["terkom ceo", "Андрей Николаевич Терехов — доктор физико-математических наук, профессор, заведующий кафедрой СП СПбГУ."]
+}'
+```
 
-    Response:
-    ```json
+Response:
+```json
+{
+  "data": [
     {
-      "data": [
-        {
-          "object": "embedding",
-          "index": 0,
-          "embedding": [
-            -0.004258352797478437,
-            -0.024816041812300682,
-            ...
-            0.009389051236212254
-          ]
-        },
-        {
-          "object": "embedding",
-          "index": 1,
-          "embedding": [
-            -0.021062027662992477,
-            0.014139993116259575,
-            ...
-            0.0022093546576797962
-          ]
-        }
+      "object": "embedding",
+      "index": 0,
+      "embedding": [
+        -0.004258352797478437,
+        -0.024816041812300682,
+        ...
+        0.009389051236212254
+      ]
+    },
+    {
+      "object": "embedding",
+      "index": 1,
+      "embedding": [
+        -0.021062027662992477,
+        0.014139993116259575,
+        ...
+        0.0022093546576797962
       ]
     }
-    ```
+  ]
+}
+```
 </details>
 
 

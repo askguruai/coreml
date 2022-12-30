@@ -20,7 +20,9 @@ def read_root():
 
 @app.post("/embeddings/")
 async def get_embeddings(embeddings_input: EmbeddingsInput):
-    logging.info("text(s) to embed:" + '\n' + pformat(embeddings_input.input))
+    logging.info(
+        f"Number of texts to embed: {1 if type(embeddings_input.input) == str else len(embeddings_input.input)}"
+    )
     return {
         "data": openai.Embedding.create(
             input=embeddings_input.input, model=CONFIG["embeddings"]["model"]

@@ -33,14 +33,25 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 @app.post("/completions/")
 async def get_completions(completions_input: CompletionsInput):
     prompt = (
-        CONFIG["completions"]["intro"]
-        + "\n\n"
-        + completions_input.info
-        + "\n\n"
-        + "Question: "
-        + completions_input.query
-        + '\n'
-        + "Answer:"
+        (
+            CONFIG["completions"]["intro_info"]
+            + "\n\n"
+            + completions_input.info
+            + "\n\n"
+            + "Question: "
+            + completions_input.query
+            + '\n'
+            + "Answer:"
+        )
+        if completions_input.info
+        else (
+            CONFIG["completions"]["intro_general"]
+            + "\n\n"
+            + "Question: "
+            + completions_input.query
+            + '\n'
+            + "Answer:"
+        )
     )
     logging.info("completions request:" + '\n' + prompt)
     answer = openai.Completion.create(

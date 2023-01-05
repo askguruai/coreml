@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -9,4 +9,4 @@ class EmbeddingsInput(BaseModel):
 
 class CompletionsInput(BaseModel):
     query: str
-    info: str
+    info: Optional[str] = None

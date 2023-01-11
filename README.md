@@ -5,7 +5,7 @@ ML Core Service is able to get embeddings from text(s) and generate response bas
 
 ## API
 
-- Interactive documentation available in [swagger](http://78.141.213.164:5555/docs).
+- Interactive documentation available in [swagger](http://78.141.213.164:5000/docs).
 
 ### POST /embeddings
 
@@ -22,7 +22,7 @@ Creates an embedding vector representing the input text.
 
 ```bash
 curl -X 'POST' \
-  'http://78.141.213.164:5555/embeddings/' \
+  'http://78.141.213.164:5000/embeddings/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -54,7 +54,7 @@ Response:
 
 ```bash
 curl -X 'POST' \
-  'http://78.141.213.164:5555/embeddings/' \
+  'http://78.141.213.164:5000/embeddings/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -107,7 +107,7 @@ Answers given question based on provided infromation.
 
 ```bash
 curl -X 'POST' \
-  'http://78.141.213.164:5555/completions/' \
+  'http://78.141.213.164:5000/completions/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{

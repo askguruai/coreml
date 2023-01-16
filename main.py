@@ -6,6 +6,7 @@ import openai
 import uvicorn
 from fastapi import FastAPI
 
+from data import PROMPT_GENERAL, PROMPT_NO_INFO
 from utils import CONFIG
 from utils.api import CompletionsInput, EmbeddingsInput
 from utils.logging import run_uvicorn_loguru
@@ -33,25 +34,9 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 @app.post("/completions/")
 async def get_completions(completions_input: CompletionsInput):
     prompt = (
-        (
-            CONFIG["completions"]["intro_info"]
-            + "\n\n"
-            + completions_input.info
-            + "\n\n"
-            + "Question: "
-            + completions_input.query
-            + '\n'
-            + "Answer:"
-        )
+        PROMPT_GENERAL(completions_input.info, completions_input.query)
         if completions_input.info
-        else (
-            CONFIG["completions"]["intro_general"]
-            + "\n\n"
-            + "Question: "
-            + completions_input.query
-            + '\n'
-            + "Answer:"
-        )
+        else PROMPT_NO_INFO(completions_input.query)
     )
     logging.info("completions request:" + '\n' + prompt)
     answer = openai.Completion.create(

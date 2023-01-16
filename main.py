@@ -66,7 +66,7 @@ async def get_completions(completions_input: CompletionsInput):
         # stop=['\n']
     )
     logging.info("completions result:" + '\n' + pformat(answer))
-    return {"data": answer["choices"][0]["text"]}
+    return {"data": answer["choices"][0]["text"].lstrip()}
 
 
 if __name__ == "__main__":

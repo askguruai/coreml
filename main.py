@@ -35,13 +35,11 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
         f"Number of texts to embed: {1 if type(embeddings_input.input) == str else len(embeddings_input.input)}"
     )
     try:
-        print(kek)
         embeddings = openai.Embedding.create(
             input=embeddings_input.input, model=CONFIG["embeddings"]["model"]
         )["data"]
         return EmbeddingsResponse(data=embeddings)
-    # except openai.error.APIError as e:
-    except Exception as e:
+    except openai.error.APIError as e:
         logging.error(f"OpenAI API returned an API Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -4,13 +4,18 @@ from typing import List
 
 import openai
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 
 from data import PROMPT_GENERAL, PROMPT_NO_INFO
 from utils import CONFIG
-from utils.api import CompletionsInput, EmbeddingsInput
+from utils.api import (
+    CompletionsInput,
+    CompletionsResponse,
+    EmbeddingsInput,
+    EmbeddingsResponse,
+    HTTPExceptionResponse,
+)
 from utils.logging import run_uvicorn_loguru
-from openai.error import OpenAIError
 
 app = FastAPI()
 
@@ -20,23 +25,35 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/embeddings/")
+@app.post(
+    "/embeddings/",
+    response_model=EmbeddingsResponse,
+    responses={500: {"model": HTTPExceptionResponse}},
+)
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(
         f"Number of texts to embed: {1 if type(embeddings_input.input) == str else len(embeddings_input.input)}"
     )
     try:
+        print(kek)
         embeddings = openai.Embedding.create(
             input=embeddings_input.input, model=CONFIG["embeddings"]["model"]
         )["data"]
-        response = {"status": "ok", "data": embeddings}
-    except OpenAIError as e:
-        logging.error(f"OpenAI error: {str(e)}")
-        response = {"status": "error", "message": f"OpenAI error: {str(e)}"}
-    return response
+        return EmbeddingsResponse(data=embeddings)
+    # except openai.error.APIError as e:
+    except Exception as e:
+        logging.error(f"OpenAI API returned an API Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"OpenAI API returned an API Error: {e}",
+        )
 
 
-@app.post("/completions/")
+@app.post(
+    "/completions/",
+    response_model=CompletionsResponse,
+    responses={500: {"model": HTTPExceptionResponse}},
+)
 async def get_completions(completions_input: CompletionsInput):
     prompt = (
         PROMPT_GENERAL(completions_input.info, completions_input.query)
@@ -56,12 +73,14 @@ async def get_completions(completions_input: CompletionsInput):
             presence_penalty=0.6
             # stop=['\n']
         )
-        response = {"data": answer["choices"][0]["text"].lstrip()}
         logging.info("completions result:" + '\n' + pformat(answer))
-    except OpenAIError as e:
-        logging.error(f"OpenAI error: {str(e)}")
-        response = {"status": "error", "message": f"OpenAI error: {str(e)}"}
-    return response
+        return CompletionsResponse(data=answer["choices"][0]["text"].lstrip())
+    except openai.error.APIError as e:
+        logging.error(f"OpenAI API returned an API Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"OpenAI API returned an API Error: {e}",
+        )
 
 
 if __name__ == "__main__":

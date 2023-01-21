@@ -28,7 +28,7 @@ def read_root():
 @app.post(
     "/embeddings/",
     response_model=EmbeddingsResponse,
-    responses={500: {"model": HTTPExceptionResponse}},
+    responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(
@@ -50,7 +50,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 @app.post(
     "/completions/",
     response_model=CompletionsResponse,
-    responses={500: {"model": HTTPExceptionResponse}},
+    responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )
 async def get_completions(completions_input: CompletionsInput):
     prompt = (
@@ -74,6 +74,7 @@ async def get_completions(completions_input: CompletionsInput):
         logging.info("completions result:" + '\n' + pformat(answer))
         return CompletionsResponse(data=answer["choices"][0]["text"].lstrip())
     except openai.error.APIError as e:
+    # except Exception as e:
         logging.error(f"OpenAI API returned an API Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

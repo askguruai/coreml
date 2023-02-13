@@ -73,12 +73,12 @@ async def get_completions(completions_input: CompletionsInput):
         )
         logging.info("completions result:" + '\n' + pformat(answer))
         return CompletionsResponse(data=answer["choices"][0]["text"].lstrip())
-    except openai.error.APIError as e:
+    except Exception as e:
     # except Exception as e:
-        logging.error(f"OpenAI API returned an API Error: {e}")
+        logging.error(f"{e.__class__.__name__}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OpenAI API returned an API Error: {e}",
+            detail=f"{e.__class__.__name__}: {e}",
         )
 
 

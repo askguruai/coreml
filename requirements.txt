@@ -3,3 +3,8 @@ fastapi
 uvicorn[standart]
 loguru
 numpy
+torch
+sentence_transformers
+transformers
+datasets
+InstructorEmbedding

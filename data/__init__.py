@@ -1,1 +1,1 @@
-from data.prompts import PROMPT_GENERAL, PROMPT_NO_INFO
+from data.prompts import EMBEDDING_INSTRUCTION, PROMPT_GENERAL, PROMPT_NO_INFO

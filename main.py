@@ -5,6 +5,7 @@ from typing import List
 import openai
 import uvicorn
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import RedirectResponse
 
 from data import EMBEDDING_INSTRUCTION, PROMPT_GENERAL, PROMPT_NO_INFO
 from ml import CompletionModel, EmbeddingModel
@@ -34,8 +35,8 @@ def init_data():
 
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+async def docs_redirect():
+    return RedirectResponse(url="/docs")
 
 
 @app.post(

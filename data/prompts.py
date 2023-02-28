@@ -24,7 +24,7 @@ EMBEDDING_INSTRUCTION = (
 )
 
 COMPLETIONS_PROMPT_CUSTOM = (
-    lambda info, query: f"""Answer following question in detail based on given text. If no relevant information present, say \" no relevant info present, can't answer\".
+    lambda info, query: f"""Answer following question in detail based on given text.
 
 {info}
 

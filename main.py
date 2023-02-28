@@ -69,9 +69,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 )
 async def get_completions(completions_input: CompletionsInput):
     prompt = (
-        PROMPT_GENERAL(
-            completions_input.info.replace("\n\n", "\n"), completions_input.query
-        )
+        PROMPT_GENERAL(completions_input.info.replace("\n\n", "\n"), completions_input.query)
         if completions_input.info
         else PROMPT_NO_INFO(completions_input.query)
     )

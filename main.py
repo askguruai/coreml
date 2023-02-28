@@ -95,7 +95,7 @@ async def docs_redirect():
 
 
 @app.on_event("startup")
-def init_data():
+def init_models():
     global embedding_model, completion_model
     completion_model = CompletionModel(
         model_name=CONFIG["v2.completions"]["model"],

@@ -9,14 +9,10 @@ class CompletionModel:
         logging.info(f"Loading {model_name} model to {device}")
         self.device = torch.device(device)
         self.tokenizer = T5Tokenizer.from_pretrained(model_name)
-        self.model = T5ForConditionalGeneration.from_pretrained(model_name).to(
-            self.device
-        )
+        self.model = T5ForConditionalGeneration.from_pretrained(model_name).to(self.device)
 
     def get_completion(self, prompt: str) -> str:
-        input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(
-            self.device
-        )
+        input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(self.device)
         outputs = self.model.generate(
             input_ids,
             temperature=1.0,

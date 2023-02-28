@@ -8,7 +8,5 @@ class EmbeddingModel:
         self.model = INSTRUCTOR(model_name_or_path=model_name, device=device)
 
     def get_embeddings(self, input: List[str], instruction: str) -> List[List[float]]:
-        embeddings = self.model.encode(
-            sentences=[[instruction, text] for text in input]
-        )
+        embeddings = self.model.encode(sentences=[[instruction, text] for text in input])
         return embeddings.tolist()

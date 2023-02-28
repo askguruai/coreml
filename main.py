@@ -31,7 +31,7 @@ app = FastAPI()
 
 @app.get("/")
 async def docs_redirect():
-    return RedirectResponse(url="/v1")
+    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v1/docs")
 
 
 v1 = FastAPI()
@@ -39,7 +39,7 @@ v1 = FastAPI()
 
 @v1.get("/")
 async def docs_redirect():
-    return RedirectResponse(url="/v1/docs")
+    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v1/docs")
 
 
 @v1.post(
@@ -91,7 +91,7 @@ v2 = FastAPI()
 
 @v2.get("/")
 async def docs_redirect():
-    return RedirectResponse(url="/v2/docs")
+    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v2/docs")
 
 
 @app.on_event("startup")

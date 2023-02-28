@@ -19,8 +19,12 @@ Question: {query}
 Answer:"""
 )
 
+# EMBEDDING_INSTRUCTION = (
+#     "Represent the knowledge base search query for retrieving relevant information."
+# )
+
 EMBEDDING_INSTRUCTION = (
-    "Represent the knowledge base search query for retrieving relevant information."
+    "Represent the text snippet for similarity search."
 )
 
 COMPLETIONS_PROMPT_CUSTOM = (

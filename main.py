@@ -70,15 +70,15 @@ async def get_completions(completions_input: CompletionsInput):
         else COMPLETIONS_PROMPT_OPENAI_NO_INFO(completions_input.query)
     )
     logging.info("completions request:" + '\n' + prompt)
-    answer = openai.Completion.create(
+    answer = openai.ChatCompletion.create(
         model=CONFIG["v1.completions"]["model"],
-        prompt=prompt,
+        messages=[
+            {"role": "user", "content": prompt},
+        ],
         temperature=0.9,
         max_tokens=300,
-        top_p=1,
-        frequency_penalty=0.0,
         presence_penalty=0.6,
-    )["choices"][0]["text"].lstrip()
+    )["choices"][0]["message"]["content"].lstrip()
     logging.info("completions result:" + '\n' + answer)
     return CompletionsResponse(data=answer)
 

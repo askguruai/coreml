@@ -11,6 +11,7 @@ from data import (
     COMPLETIONS_PROMPT_CUSTOM,
     COMPLETIONS_PROMPT_OPENAI,
     COMPLETIONS_PROMPT_OPENAI_NO_INFO,
+    COMPLETIONS_PROMPT_OPENAI_SYSTEM,
     EMBEDDING_INSTRUCTION,
 )
 from ml import CompletionModel, EmbeddingModel
@@ -73,6 +74,10 @@ async def get_completions(completions_input: CompletionsInput):
     answer = openai.ChatCompletion.create(
         model=CONFIG["v1.completions"]["model"],
         messages=[
+            {
+                "role": "system",
+                "content": COMPLETIONS_PROMPT_OPENAI_SYSTEM[completions_input.mode],
+            },
             {"role": "user", "content": prompt},
         ],
         temperature=0.9,
@@ -147,7 +152,6 @@ app.mount("/v1", v1)
 
 
 if __name__ == "__main__":
-
     run_uvicorn_loguru(
         uvicorn.Config(
             "main:app",

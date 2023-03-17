@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel, Field
@@ -41,9 +42,9 @@ class CompletionsInput(BaseModel):
         example="When I was a kid I used to play drums",
     )
     mode: CompletionsMode | None = Field(
-        default=None,
+        default=CompletionsMode.general,
         description=f"Mode of the completion. If not provided, the default mode will be used. Possible values: {', '.join([mode.value for mode in CompletionsMode])}",
-        example="support",
+        example=CompletionsMode.support,
     )
 
 

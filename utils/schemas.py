@@ -26,6 +26,11 @@ class EmbeddingsResponse(BaseModel):
     )
 
 
+class CompletionsMode(str, Enum):
+    general = "general"
+    support = "support"
+
+
 class CompletionsInput(BaseModel):
     query: str = Field(
         description="A query to get an asnwer to.", example="What did you do as a kid?"
@@ -34,6 +39,11 @@ class CompletionsInput(BaseModel):
         default=None,
         description="Information to use for answering the query. If not provided, the query will be answered without any context.",
         example="When I was a kid I used to play drums",
+    )
+    mode: CompletionsMode | None = Field(
+        default=None,
+        description=f"Mode of the completion. If not provided, the default mode will be used. Possible values: {', '.join([mode.value for mode in CompletionsMode])}",
+        example="support",
     )
 
 

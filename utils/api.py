@@ -10,9 +10,9 @@ def catch_errors(func):
         try:
             return await func(*args, **kwargs)
         except Exception as e:
+            logging.error(f"{e.__class__.__name__}: {e}")
             if isinstance(e, HTTPException):
                 raise e
-            logging.error(f"{e.__class__.__name__}: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"{e.__class__.__name__}: {e}",

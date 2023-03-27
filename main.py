@@ -1,4 +1,5 @@
 import logging
+import threading
 import time
 from pprint import pformat
 from typing import List
@@ -34,10 +35,10 @@ app = FastAPI()
 
 @app.on_event("startup")
 def init_globals():
-    global manager, multiprocessing_context_fork, multiprocessing_context_spawn
+    global manager, multiprocessing_context_fork, multiprocessing_context_forkserver
     manager = multiprocessing.Manager()
     multiprocessing_context_fork = multiprocessing.get_context("fork")
-    multiprocessing_context_spawn = multiprocessing.get_context("spawn")
+    multiprocessing_context_forkserver = multiprocessing.get_context("forkserver")
 
     global embedding_model, t5_completion_model, openai_completion_model
     openai_completion_model = OpenAICompletionModel(
@@ -168,21 +169,21 @@ async def get_completions(completions_input: CompletionsInput):
     logging.info("Received completions request")
 
     state = manager.dict()
-    jobs = []
     for completion_model, context in zip(
         [openai_completion_model, t5_completion_model],
-        [multiprocessing_context_fork, multiprocessing_context_spawn],
+        [multiprocessing_context_fork, multiprocessing_context_forkserver],
     ):
         job = context.Process(
             target=CompletionModel.get_completion_subprocess,
             args=(completion_model, completions_input, state),
             name=completion_model.__class__.__name__,
         )
-        job.start()
-        logging.info(f"Started job {job.name}")
-        jobs.append(job)
-
-    logging.info(f"Started {len(jobs)} jobs")
+        # job.start takes a lot of time itself
+        # and while we don't want to wait for starting
+        # second job if first one is already finished
+        thread = threading.Thread(target=job.start)
+        thread.start()
+        logging.info(f"Started thread with job {job.name}")
 
     start = time.time()
     while time.time() - start < int(CONFIG["v3.completions"]["general_timeout"]):
@@ -193,9 +194,6 @@ async def get_completions(completions_input: CompletionsInput):
         time.sleep(0.1)
 
     logging.info(f"Finished in {round(time.time() - start, 2)} seconds with state {state}")
-
-    for job in jobs:
-        job.terminate()
 
     if not state:
         raise HTTPException(

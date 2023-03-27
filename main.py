@@ -34,8 +34,10 @@ app = FastAPI()
 
 @app.on_event("startup")
 def init_globals():
-    global manager
+    global manager, multiprocessing_context_fork, multiprocessing_context_spawn
     manager = multiprocessing.Manager()
+    multiprocessing_context_fork = multiprocessing.get_context("fork")
+    multiprocessing_context_spawn = multiprocessing.get_context("spawn")
 
     global embedding_model, t5_completion_model, openai_completion_model
     openai_completion_model = OpenAICompletionModel(
@@ -167,8 +169,11 @@ async def get_completions(completions_input: CompletionsInput):
 
     state = manager.dict()
     jobs = []
-    for completion_model in [openai_completion_model, t5_completion_model]:
-        job = multiprocessing.Process(
+    for completion_model, context in zip(
+        [openai_completion_model, t5_completion_model],
+        [multiprocessing_context_fork, multiprocessing_context_spawn],
+    ):
+        job = context.Process(
             target=CompletionModel.get_completion_subprocess,
             args=(completion_model, completions_input, state),
             name=completion_model.__class__.__name__,
@@ -176,7 +181,6 @@ async def get_completions(completions_input: CompletionsInput):
         job.start()
         logging.info(f"Started job {job.name}")
         jobs.append(job)
-
 
     logging.info(f"Started {len(jobs)} jobs")
 
@@ -212,7 +216,6 @@ app.mount("/v3", v3)
 
 
 if __name__ == "__main__":
-    multiprocessing.set_start_method("spawn")
     run_uvicorn_loguru(
         uvicorn.Config(
             "main:app",

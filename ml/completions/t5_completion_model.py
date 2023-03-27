@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 
 import torch
 from transformers import T5ForConditionalGeneration, T5Tokenizer
@@ -10,7 +10,7 @@ from utils.schemas import CompletionsInput
 
 class T5CompletionModel(CompletionModel):
     def __init__(self, model_name: str, device: str):
-        logging.info(f"Loading {model_name} model to {device}")
+        logger.info(f"Loading {model_name} model to {device}")
         self.device = torch.device(device)
         self.tokenizer = T5Tokenizer.from_pretrained(model_name)
         self.model = T5ForConditionalGeneration.from_pretrained(model_name).to(self.device)
@@ -24,7 +24,7 @@ class T5CompletionModel(CompletionModel):
             if completions_input.info
             else COMPLETIONS_PROMPT_OPENAI_NO_INFO(completions_input.query)
         )
-        logging.info("completions request:" + "\n" + prompt)
+        logger.info("completions request:" + "\n" + prompt)
         input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(self.device)
         outputs = self.model.generate(
             input_ids,
@@ -34,5 +34,5 @@ class T5CompletionModel(CompletionModel):
             repetition_penalty=2.5,
         )
         answer = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        logging.info("completions result:" + "\n" + answer)
+        logger.info("completions result:" + "\n" + answer)
         return answer

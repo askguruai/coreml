@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 
 import openai
 
@@ -22,7 +22,7 @@ class OpenAICompletionModel(CompletionModel):
             if completions_input.info
             else COMPLETIONS_PROMPT_OPENAI_NO_INFO(completions_input.query)
         )
-        logging.info("completions request:" + '\n' + prompt)
+        logger.info("completions request:" + '\n' + prompt)
         answer = openai.ChatCompletion.create(
             model=self.model_name,
             messages=[
@@ -36,5 +36,5 @@ class OpenAICompletionModel(CompletionModel):
             max_tokens=300,
             presence_penalty=0.6,
         )["choices"][0]["message"]["content"].lstrip()
-        logging.info("completions result:" + '\n' + answer)
+        logger.info("completions result:" + '\n' + answer)
         return answer

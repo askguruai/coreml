@@ -171,9 +171,12 @@ async def get_completions(completions_input: CompletionsInput):
         job = multiprocessing.Process(
             target=CompletionModel.get_completion_subprocess,
             args=(completion_model, completions_input, state),
+            name=completion_model.__class__.__name__,
         )
         job.start()
+        logging.info(f"Started job {job.name}")
         jobs.append(job)
+
 
     logging.info(f"Started {len(jobs)} jobs")
 

@@ -1,6 +1,5 @@
-from loguru import logger
-
 import torch
+from loguru import logger
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 from data import COMPLETIONS_PROMPT_CUSTOM, COMPLETIONS_PROMPT_OPENAI_NO_INFO

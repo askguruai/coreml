@@ -1,6 +1,5 @@
-from loguru import logger
-
 import openai
+from loguru import logger
 
 from data import (
     COMPLETIONS_PROMPT_OPENAI,

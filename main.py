@@ -140,6 +140,23 @@ async def docs_redirect():
 
 
 @v3.post(
+    "/embeddings/",
+    response_model=EmbeddingsResponse,
+    responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
+)
+@catch_errors
+async def get_embeddings(embeddings_input: EmbeddingsInputInstruction):
+    logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
+    embeddings = embedding_model.get_embeddings(
+        input=embeddings_input.input,
+        instruction=embeddings_input.instruction
+        if embeddings_input.instruction
+        else EMBEDDING_INSTRUCTION,
+    )
+    return EmbeddingsResponse(data=embeddings)
+
+
+@v3.post(
     "/completions/",
     response_model=CompletionsResponse,
     responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},

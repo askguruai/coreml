@@ -17,7 +17,12 @@ from data import (
     EMBEDDING_INSTRUCTION,
 )
 from ml import EmbeddingModel
-from ml.completions import CompletionModel, OpenAICompletionModel, T5CompletionModel
+from ml.completions import (
+    AlpacaCompletionModel,
+    CompletionModel,
+    OpenAICompletionModel,
+    T5CompletionModel,
+)
 from utils import CONFIG
 from utils.api import catch_errors
 from utils.logging import run_uvicorn_loguru
@@ -40,11 +45,11 @@ def init_globals():
     multiprocessing_context_fork = multiprocessing.get_context("fork")
     multiprocessing_context_forkserver = multiprocessing.get_context("forkserver")
 
-    global embedding_model, t5_completion_model, openai_completion_model
+    global embedding_model, alpaca_completion_model, openai_completion_model
     openai_completion_model = OpenAICompletionModel(
         model_name=CONFIG["v1.completions"]["model"],
     )
-    t5_completion_model = T5CompletionModel(
+    alpaca_completion_model = AlpacaCompletionModel(
         model_name=CONFIG["v2.completions"]["model"],
         device=CONFIG["v2.completions"]["device"],
     )
@@ -127,7 +132,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInputInstruction):
 )
 @catch_errors
 async def get_completions(completions_input: CompletionsInput):
-    completion = t5_completion_model.get_completion(completions_input=completions_input)
+    completion = alpaca_completion_model.get_completion(completions_input=completions_input)
     return CompletionsResponse(data=completion)
 
 
@@ -185,7 +190,7 @@ async def get_completions(completions_input: CompletionsInput):
 
     state = manager.dict()
     for completion_model, context in zip(
-        [openai_completion_model, t5_completion_model],
+        [openai_completion_model, alpaca_completion_model],
         [multiprocessing_context_fork, multiprocessing_context_forkserver],
     ):
         job = context.Process(
@@ -219,7 +224,7 @@ async def get_completions(completions_input: CompletionsInput):
     completion = (
         state[openai_completion_model.__class__.__name__]
         if openai_completion_model.__class__.__name__ in state
-        else state[t5_completion_model.__class__.__name__]
+        else state[alpaca_completion_model.__class__.__name__]
     )
 
     return CompletionsResponse(data=completion)

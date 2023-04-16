@@ -10,12 +10,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
 from torch import multiprocessing
 
-from data import (
-    COMPLETIONS_PROMPT_OPENAI,
-    COMPLETIONS_PROMPT_OPENAI_NO_INFO,
-    COMPLETIONS_PROMPT_OPENAI_SYSTEM,
-    EMBEDDING_INSTRUCTION,
-)
+from data import EMBEDDING_INSTRUCTION
 from ml import EmbeddingModel
 from ml.completions import (
     AlpacaCompletionModel,

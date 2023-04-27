@@ -34,7 +34,7 @@ class OpenAICompletionModel(CompletionModel):
         answer = openai.ChatCompletion.create(
             model=self.model_name,
             messages=messages,
-            temperature=0.9,
+            temperature=0.4,
             max_tokens=300,
             presence_penalty=0.6,
         )["choices"][0]["message"]["content"].lstrip()
@@ -48,7 +48,7 @@ class OpenAICompletionModel(CompletionModel):
             case "general":
                 prompt += "You are helpful assistant which follows given instructions and is seeking to answer a user's question."
             case "support":
-                prompt += "You are a customer support agent who is seeking to provide a complete, simple and helpful answer to a customer in a friendly manner. If text does not provide relevant information, say that you are not able to help because knowledge base does not contain necessary information."
+                prompt += "You are a customer support agent who is seeking to provide a complete, simple and helpful answer to a customer in a friendly manner. If text does not provide relevant information, say that you are not able to help because knowledge base does not contain necessary information. Do not refer to customer support in your answer."
 
         if completions_input.info:
             prompt += f"\n\nYou found following relevant information (which is not visible to a user):\n\"\"\"\n{completions_input.info}"

@@ -74,9 +74,9 @@ async def docs_redirect():
 @catch_errors
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
-    embeddings = openai.Embedding.create(
+    embeddings = (await openai.Embedding.acreate(
         input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]
-    )["data"]
+    ))["data"]
     embeddings = [embedding["embedding"] for embedding in embeddings]
     return EmbeddingsResponse(data=embeddings)
 
@@ -88,7 +88,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 )
 @catch_errors
 async def get_completions(completions_input: CompletionsInput):
-    answer = openai_completion_model.get_completion(completions_input=completions_input)
+    answer = await openai_completion_model.get_completion(completions_input=completions_input)
     return CompletionsResponse(data=answer)
 
 

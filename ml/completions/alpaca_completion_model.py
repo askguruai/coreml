@@ -11,17 +11,30 @@ class AlpacaCompletionModel(CompletionModel):
         logger.info(f"Loading {model_name} model to {device}")
         self.device = torch.device(device)
         self.tokenizer = LlamaTokenizer.from_pretrained(model_name)
-        self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16).to(
+        # self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16).to(
+        #     self.device
+        # )
+        self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16).to(
             self.device
         )
         self.model.eval()
         # self.model = torch.compile(self.model)
 
         self.generation_config = GenerationConfig(
-            temperature=0.7,
+            # temperature=0.7,
+            # top_p=0.75,
+            # top_k=40,
+            max_new_tokens=300,
+            temperature=0.2,
             top_p=0.75,
             top_k=40,
-            max_new_tokens=300,
+            num_beams=1,
+            no_repeat_ngram_size=3,
+            repetition_penalty=1.2,
+            encoder_repetition_penalty=1.0,
+            typical_p=1.0,
+            length_penalty=1.2,
+            do_sample=True,
         )
 
     def get_completion(self, completions_input: CompletionsInput) -> str:

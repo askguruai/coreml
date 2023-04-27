@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import List
+from typing import Dict, List, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class HTTPExceptionResponse(BaseModel):
@@ -32,20 +32,43 @@ class CompletionsMode(str, Enum):
     support = "support"
 
 
+class ChatRoles(str, Enum):
+    user = "user"
+    assistant = "assistant"
+
+
 class CompletionsInput(BaseModel):
     query: str = Field(
-        description="A query to get an asnwer to.", example="What did you do as a kid?"
+        description="A query to get an asnwer to.", example="Do you offer screen sharing chat?"
     )
     info: str | None = Field(
         default=None,
         description="Information to use for answering the query. If not provided, the query will be answered without any context.",
-        example="When I was a kid I used to play drums",
+        example="Available options: Teamviewer and join.me",
+    )
+    chat: List[Dict[Literal["role", "content"], str]] = Field(
+        default=None,
+        description="Chat history from communication between user and agent.",
+        example=[
+            {"role": "user", "content": "hi"},
+            {"role": "user", "content": "do you offer screen sharing chat"},
+            {"role": "assistant", "content": "Hello, I will check, thanks for waiting."},
+            {"role": "user", "content": "Sure."},
+        ],
     )
     mode: CompletionsMode | None = Field(
         default=CompletionsMode.general,
         description=f"Mode of the completion. If not provided, the default mode will be used. Possible values: {', '.join([mode.value for mode in CompletionsMode])}",
         example=CompletionsMode.support,
     )
+
+    @validator("chat", each_item=True)
+    def validate_chat_author(cls, v):
+        if v["role"] not in [role.value for role in ChatRoles]:
+            raise ValueError(
+                f"Role must be one of {', '.join([role.value for role in ChatRoles])}"
+            )
+        return v
 
 
 class CompletionsResponse(BaseModel):

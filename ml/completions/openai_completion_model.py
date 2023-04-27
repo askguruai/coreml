@@ -12,7 +12,7 @@ class OpenAICompletionModel(CompletionModel):
     def __init__(self, model_name: str):
         self.model_name = model_name
 
-    def get_completion(self, completions_input: CompletionsInput) -> str:
+    async def get_completion(self, completions_input: CompletionsInput) -> str:
         messages = [
             {
                 "role": "system",
@@ -31,13 +31,13 @@ class OpenAICompletionModel(CompletionModel):
             )
 
         logger.info("completions request:" + '\n' + pformat(messages))
-        answer = openai.ChatCompletion.create(
+        answer = (await openai.ChatCompletion.acreate(
             model=self.model_name,
             messages=messages,
             temperature=0.4,
             max_tokens=300,
             presence_penalty=0.6,
-        )["choices"][0]["message"]["content"].lstrip()
+        ))["choices"][0]["message"]["content"].lstrip()
         logger.info("completions result:" + '\n' + answer)
         return answer
 

@@ -44,13 +44,13 @@ def init_globals():
     openai_completion_model = OpenAICompletionModel(
         model_name=CONFIG["v1.completions"]["model"],
     )
-    alpaca_completion_model = AlpacaCompletionModel(
-        model_name=CONFIG["v2.completions"]["model"],
-        device=CONFIG["v2.completions"]["device"],
-    )
-    embedding_model = EmbeddingModel(
-        model_name=CONFIG["v2.embeddings"]["model"], device=CONFIG["v2.embeddings"]["device"]
-    )
+    # alpaca_completion_model = AlpacaCompletionModel(
+    #     model_name=CONFIG["v2.completions"]["model"],
+    #     device=CONFIG["v2.completions"]["device"],
+    # )
+    # embedding_model = EmbeddingModel(
+    #     model_name=CONFIG["v2.embeddings"]["model"], device=CONFIG["v2.embeddings"]["device"]
+    # )
 
 
 @app.get("/")
@@ -131,7 +131,7 @@ async def get_completions(completions_input: CompletionsInput):
     return CompletionsResponse(data=completion)
 
 
-app.mount("/v2", v2)
+# app.mount("/v2", v2)
 
 
 v3 = FastAPI()
@@ -225,7 +225,7 @@ async def get_completions(completions_input: CompletionsInput):
     return CompletionsResponse(data=completion)
 
 
-app.mount("/v3", v3)
+# app.mount("/v3", v3)
 
 
 if __name__ == "__main__":

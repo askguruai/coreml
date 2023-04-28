@@ -31,13 +31,15 @@ class OpenAICompletionModel(CompletionModel):
             )
 
         logger.info("completions request:" + '\n' + pformat(messages))
-        answer = (await openai.ChatCompletion.acreate(
-            model=self.model_name,
-            messages=messages,
-            temperature=0.4,
-            max_tokens=300,
-            presence_penalty=0.6,
-        ))["choices"][0]["message"]["content"].lstrip()
+        answer = (
+            await openai.ChatCompletion.acreate(
+                model=self.model_name,
+                messages=messages,
+                temperature=0.4,
+                max_tokens=300,
+                presence_penalty=0.6,
+            )
+        )["choices"][0]["message"]["content"].lstrip()
         logger.info("completions result:" + '\n' + answer)
         return answer
 

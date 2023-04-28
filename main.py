@@ -74,9 +74,11 @@ async def docs_redirect():
 @catch_errors
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
-    embeddings = (await openai.Embedding.acreate(
-        input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]
-    ))["data"]
+    embeddings = (
+        await openai.Embedding.acreate(
+            input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]
+        )
+    )["data"]
     embeddings = [embedding["embedding"] for embedding in embeddings]
     return EmbeddingsResponse(data=embeddings)
 

@@ -10,3 +10,4 @@ datasets
 InstructorEmbedding
 sentencepiece
 accelerate
+async-lru

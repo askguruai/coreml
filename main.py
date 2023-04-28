@@ -6,6 +6,7 @@ from typing import List
 
 import openai
 import uvicorn
+from async_lru import alru_cache
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
 from torch import multiprocessing
@@ -72,6 +73,7 @@ async def docs_redirect():
     responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )
 @catch_errors
+@alru_cache(maxsize=512)
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
     embeddings = (
@@ -89,6 +91,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
     responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )
 @catch_errors
+@alru_cache(maxsize=512)
 async def get_completions(completions_input: CompletionsInput):
     answer = await openai_completion_model.get_completion(completions_input=completions_input)
     return CompletionsResponse(data=answer)

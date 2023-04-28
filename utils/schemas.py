@@ -11,6 +11,9 @@ class HTTPExceptionResponse(BaseModel):
 class EmbeddingsInput(BaseModel):
     input: List[str] = Field(description="Texts to embed.", example=["Hello world!"])
 
+    def __hash__(self):
+        return hash(tuple(self.input))
+
 
 class EmbeddingsInputInstruction(BaseModel):
     input: List[str] = Field(description="Texts to embed.", example=["Hello world!"])
@@ -46,7 +49,7 @@ class CompletionsInput(BaseModel):
         description="Information to use for answering the query. If not provided, the query will be answered without any context.",
         example="Available options: Teamviewer and join.me",
     )
-    chat: List[Dict[Literal["role", "content"], str]] = Field(
+    chat: List[Dict[Literal["role", "content"], str]] | None = Field(
         default=None,
         description="Chat history from communication between user and agent.",
         example=[
@@ -69,6 +72,14 @@ class CompletionsInput(BaseModel):
                 f"Role must be one of {', '.join([role.value for role in ChatRoles])}"
             )
         return v
+
+    def __hash__(self):
+        # to fasten the hash of chat history, only the first and last message are considered
+        # chat_hashable = None if not self.chat else tuple((self.chat[idx]["role"], self.chat[idx]["content"]) for idx in [0, -1])
+        chat_hashable = (
+            None if not self.chat else tuple((msg["role"], msg["content"]) for msg in self.chat)
+        )
+        return hash((self.query, self.info, chat_hashable, self.mode))
 
 
 class CompletionsResponse(BaseModel):

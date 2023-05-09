@@ -56,9 +56,9 @@ class OpenAICompletionModel(CompletionModel):
             case "general":
                 prompt += "You are helpful assistant which follows given instructions and is seeking to answer a user's question."
             case "support":
-                prompt += "You are a customer support agent who is seeking to provide a complete, simple and helpful answer to a customer in a friendly manner. If text does not provide relevant information, say that you are not able to help because knowledge base does not contain necessary information. Do not refer to customer support in your answer."
+                prompt += "You are an AI which acts as a customer support agent who is seeking to provide a complete, simple, helpful AND TRUTHFUL answer to a customer.\nIn your answer do not refer to customer support because you ARE customer support."
 
         if completions_input.info:
-            prompt += f"\n\nYou found following relevant information (which is not visible to a user):\n\"\"\"\n{completions_input.info}"
+            prompt += f"\nYou are given the following extracted parts of a long document and a question, create a final answer.\nIf you don't know the answer, just say that you don't know. Don't try to make up an answer.\nExtracted parts:\n\"\"\"\n{completions_input.info}\"\"\""
 
         return prompt

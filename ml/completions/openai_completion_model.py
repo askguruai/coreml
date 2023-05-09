@@ -33,7 +33,7 @@ class OpenAICompletionModel(CompletionModel):
         logger.info(
             "completions request:"
             + '\n'
-            + '\n============================='.join(
+            + '\n=============================\n'.join(
                 [f"{message['role']}: {message['content']}" for message in messages]
             )
         )

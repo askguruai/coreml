@@ -24,7 +24,7 @@ class OpenAICompletionModel(CompletionModel):
             messages.append(
                 {
                     "role": "user",
-                    "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\nParts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\""
+                    "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\nParts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
                 }
             )
 
@@ -55,6 +55,7 @@ class OpenAICompletionModel(CompletionModel):
                 presence_penalty=0.6,
             )
         )["choices"][0]["message"]["content"].lstrip()
+        answer = self.postprocess_output(answer)
         logger.info("completions result:" + '\n' + answer)
         return answer
 

@@ -30,7 +30,11 @@ class OpenAICompletionModel(CompletionModel):
                 }
             )
 
-        logger.info("completions request:" + '\n' + pformat(messages))
+        logger.info(
+            "completions request:"
+            + '\n'
+            + '\n'.join([f"{message['role']}: {message['content']}" for message in messages])
+        )
         answer = (
             await openai.ChatCompletion.acreate(
                 model=self.model_name,

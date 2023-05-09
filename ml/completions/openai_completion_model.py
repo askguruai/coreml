@@ -19,6 +19,15 @@ class OpenAICompletionModel(CompletionModel):
                 "content": self.get_system_prompt(completions_input),
             },
         ]
+
+        if completions_input.info:
+            messages.append(
+                {
+                    "role": "user",
+                    "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\nParts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\""
+                }
+            )
+
         if completions_input.chat:
             messages += completions_input.chat
 
@@ -57,8 +66,5 @@ class OpenAICompletionModel(CompletionModel):
                 prompt += "You are helpful assistant which follows given instructions and is seeking to answer a user's question."
             case "support":
                 prompt += "You are an AI which acts as a customer support agent who is seeking to provide a complete, simple, helpful AND TRUTHFUL answer to a customer.\nIn your answer do not refer to customer support because you ARE customer support."
-
-        if completions_input.info:
-            prompt += f"\nYou are given the following extracted parts of a long document and a question, create a final answer.\nIf you don't know the answer, just say that you don't know. Don't try to make up an answer.\nExtracted parts:\n\"\"\"\n{completions_input.info}\"\"\""
 
         return prompt

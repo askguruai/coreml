@@ -229,6 +229,5 @@ if __name__ == "__main__":
             host=CONFIG["app"]["host"],
             port=int(CONFIG["app"]["port"]),
             log_level=CONFIG["app"]["log_level"],
-            root_path=CONFIG["app"]["root_path"],
         )
     )

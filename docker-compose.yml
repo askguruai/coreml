@@ -9,3 +9,4 @@ services:
     network_mode: host
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+    tty: true

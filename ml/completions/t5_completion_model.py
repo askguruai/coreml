@@ -17,9 +17,7 @@ class T5CompletionModel(CompletionModel):
 
     def get_completion(self, completions_input: CompletionsInput) -> str:
         prompt = (
-            COMPLETIONS_PROMPT_CUSTOM(
-                completions_input.info.replace("\n\n", "\n"), completions_input.query
-            )
+            COMPLETIONS_PROMPT_CUSTOM(completions_input.info.replace("\n\n", "\n"), completions_input.query)
             if completions_input.info
             else COMPLETIONS_PROMPT_OPENAI_NO_INFO(completions_input.query)
         )

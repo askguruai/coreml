@@ -14,9 +14,7 @@ class AlpacaCompletionModel(CompletionModel):
         # self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16).to(
         #     self.device
         # )
-        self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16).to(
-            self.device
-        )
+        self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16).to(self.device)
         self.model.eval()
         # self.model = torch.compile(self.model)
 
@@ -38,9 +36,7 @@ class AlpacaCompletionModel(CompletionModel):
         )
 
     def get_completion(self, completions_input: CompletionsInput) -> str:
-        prompt = AlpacaCompletionModel.generate_prompt(
-            completions_input.query, completions_input.info
-        )
+        prompt = AlpacaCompletionModel.generate_prompt(completions_input.query, completions_input.info)
 
         logger.info("completions request:" + "\n" + prompt)
 
@@ -52,9 +48,7 @@ class AlpacaCompletionModel(CompletionModel):
                 generation_config=self.generation_config,
             )
 
-        answer = self.tokenizer.decode(
-            outputs[0][len(input_ids[0]) :], skip_special_tokens=True
-        ).lstrip()
+        answer = self.tokenizer.decode(outputs[0][len(input_ids[0]) :], skip_special_tokens=True).lstrip()
 
         logger.info("completions result:" + "\n" + answer)
         return answer

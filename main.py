@@ -13,12 +13,7 @@ from torch import multiprocessing
 
 from data import EMBEDDING_INSTRUCTION
 from ml import EmbeddingModel
-from ml.completions import (
-    AlpacaCompletionModel,
-    CompletionModel,
-    OpenAICompletionModel,
-    T5CompletionModel,
-)
+from ml.completions import AlpacaCompletionModel, CompletionModel, OpenAICompletionModel, T5CompletionModel
 from utils import CONFIG
 from utils.api import catch_errors
 from utils.logging import run_uvicorn_loguru
@@ -76,11 +71,9 @@ async def docs_redirect():
 @alru_cache(maxsize=512)
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
-    embeddings = (
-        await openai.Embedding.acreate(
-            input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]
-        )
-    )["data"]
+    embeddings = (await openai.Embedding.acreate(input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]))[
+        "data"
+    ]
     embeddings = [embedding["embedding"] for embedding in embeddings]
     return EmbeddingsResponse(data=embeddings)
 
@@ -118,9 +111,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInputInstruction):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
     embeddings = embedding_model.get_embeddings(
         input=embeddings_input.input,
-        instruction=embeddings_input.instruction
-        if embeddings_input.instruction
-        else EMBEDDING_INSTRUCTION,
+        instruction=embeddings_input.instruction if embeddings_input.instruction else EMBEDDING_INSTRUCTION,
     )
     return EmbeddingsResponse(data=embeddings)
 
@@ -172,9 +163,7 @@ async def docs_redirect():
 @catch_errors
 async def get_embeddings(embeddings_input: EmbeddingsInput):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
-    embeddings = openai.Embedding.create(
-        input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]
-    )["data"]
+    embeddings = openai.Embedding.create(input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"])["data"]
     embeddings = [embedding["embedding"] for embedding in embeddings]
     return EmbeddingsResponse(data=embeddings)
 

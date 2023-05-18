@@ -64,7 +64,7 @@ class OpenAICompletionModel(CompletionModel):
                 ).json()
                 async for message in answer
             )
-            return StreamingResponse(answer, media_type='text/event-stream')
+            return StreamingResponse(answer, media_type='text/event-stream', headers={'X-Accel-Buffering': 'no'})
         answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
         logger.info("completions result:" + '\n' + answer)
         return CompletionsResponse(data=answer)

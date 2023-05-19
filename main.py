@@ -51,7 +51,7 @@ def init_globals():
 
 @app.get("/")
 async def docs_redirect():
-    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v1/docs")
+    return RedirectResponse(url=f"/v1/docs")
 
 
 v1 = FastAPI()
@@ -59,7 +59,7 @@ v1 = FastAPI()
 
 @v1.get("/")
 async def docs_redirect():
-    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v1/docs")
+    return RedirectResponse(url=f"/v1/docs")
 
 
 @v1.post(
@@ -86,8 +86,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 )
 @catch_errors
 async def get_completions(completions_input: CompletionsInput):
-    answer = await openai_completion_model.get_completion(completions_input=completions_input)
-    return CompletionsResponse(data=answer)
+    return await openai_completion_model.get_completion(completions_input=completions_input)
 
 
 app.mount("/v1", v1)
@@ -98,7 +97,7 @@ v2 = FastAPI()
 
 @v2.get("/")
 async def docs_redirect():
-    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v2/docs")
+    return RedirectResponse(url=f"/v2/docs")
 
 
 @v2.post(
@@ -135,7 +134,7 @@ v3 = FastAPI()
 
 @v3.get("/")
 async def docs_redirect():
-    return RedirectResponse(url=f"{CONFIG['app']['root_path']}/v3/docs")
+    return RedirectResponse(url=f"/v3/docs")
 
 
 # @v3.post(

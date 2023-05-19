@@ -1,11 +1,12 @@
 from pprint import pformat
 
 import openai
+from fastapi.responses import StreamingResponse
 from loguru import logger
 
 from ml.completions import CompletionModel
 from utils import CONFIG
-from utils.schemas import CompletionsInput
+from utils.schemas import CompletionsInput, CompletionsResponse
 
 
 class OpenAICompletionModel(CompletionModel):
@@ -46,18 +47,26 @@ class OpenAICompletionModel(CompletionModel):
                 [f"{message['role']}: {message['content']}" for message in messages]
             )
         )
-        answer = (
-            await openai.ChatCompletion.acreate(
-                model=self.model_name,
-                messages=messages,
-                temperature=0.4,
-                max_tokens=300,
-                presence_penalty=0.6,
+        answer = await openai.ChatCompletion.acreate(
+            model=self.model_name,
+            messages=messages,
+            temperature=0.4,
+            max_tokens=300,
+            stream=completions_input.stream,
+        )
+        if completions_input.stream:
+            answer = (
+                CompletionsResponse(
+                    data=message["choices"][0]["delta"]["content"]
+                    if "content" in message["choices"][0]["delta"]
+                    else ""
+                ).json()
+                async for message in answer
             )
-        )["choices"][0]["message"]["content"].lstrip()
-        answer = self.postprocess_output(answer)
+            return StreamingResponse(answer, media_type='text/event-stream', headers={'X-Accel-Buffering': 'no'})
+        answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
         logger.info("completions result:" + '\n' + answer)
-        return answer
+        return CompletionsResponse(data=answer)
 
     @staticmethod
     def get_system_prompt(completions_input: CompletionsInput) -> str:

@@ -62,6 +62,10 @@ class CompletionsInput(BaseModel):
         description=f"Mode of the completion. If not provided, the default mode will be used. Possible values: {', '.join([mode.value for mode in CompletionsMode])}",
         example=CompletionsMode.support,
     )
+    stream: bool = Field(
+        default=False,
+        description="If true, the response will be streamed as it is generated. This is useful for long-running requests.",
+    )
 
     @validator("chat", each_item=True)
     def validate_chat_author(cls, v):

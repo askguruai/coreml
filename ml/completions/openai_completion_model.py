@@ -52,7 +52,6 @@ class OpenAICompletionModel(CompletionModel):
             messages=messages,
             temperature=0.4,
             max_tokens=300,
-            presence_penalty=0.6,
             stream=completions_input.stream,
         )
         if completions_input.stream:

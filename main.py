@@ -18,6 +18,7 @@ from utils import CONFIG
 from utils.api import catch_errors
 from utils.logging import run_uvicorn_loguru
 from utils.schemas import (
+    ApiVersion,
     CompletionsInput,
     CompletionsResponse,
     EmbeddingsInput,
@@ -49,27 +50,19 @@ def init_globals():
     # )
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def docs_redirect():
-    return RedirectResponse(url=f"/v1/docs")
+    return RedirectResponse(url=f"/docs")
 
 
-v1 = FastAPI()
-
-
-@v1.get("/")
-async def docs_redirect():
-    return RedirectResponse(url=f"/v1/docs")
-
-
-@v1.post(
-    "/embeddings/",
+@app.post(
+    "/{api_version}/embeddings/",
     response_model=EmbeddingsResponse,
     responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )
 @catch_errors
 @alru_cache(maxsize=512)
-async def get_embeddings(embeddings_input: EmbeddingsInput):
+async def get_embeddings(api_version: ApiVersion, embeddings_input: EmbeddingsInput):
     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
     embeddings = (await openai.Embedding.acreate(input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]))[
         "data"
@@ -79,17 +72,14 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 
 
 # @alru_cache(maxsize=512)
-@v1.post(
-    "/completions/",
+@app.post(
+    "/{api_version}/completions/",
     response_model=CompletionsResponse,
     responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )
 @catch_errors
-async def get_completions(completions_input: CompletionsInput):
-    return await openai_completion_model.get_completion(completions_input=completions_input)
-
-
-app.mount("/v1", v1)
+async def get_completions(api_version: ApiVersion, completions_input: CompletionsInput):
+    return await openai_completion_model.get_completion(completions_input=completions_input, api_version=api_version)
 
 
 v2 = FastAPI()

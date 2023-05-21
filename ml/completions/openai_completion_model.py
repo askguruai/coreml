@@ -6,14 +6,14 @@ from loguru import logger
 
 from ml.completions import CompletionModel
 from utils import CONFIG
-from utils.schemas import CompletionsInput, CompletionsResponse
+from utils.schemas import ApiVersion, CompletionsInput, CompletionsResponse
 
 
 class OpenAICompletionModel(CompletionModel):
     def __init__(self, model_name: str):
         self.model_name = model_name
 
-    async def get_completion(self, completions_input: CompletionsInput) -> str:
+    async def get_completion(self, completions_input: CompletionsInput, api_version: ApiVersion) -> CompletionsResponse:
         messages = [
             {
                 "role": "system",
@@ -25,7 +25,14 @@ class OpenAICompletionModel(CompletionModel):
             messages.append(
                 {
                     "role": "user",
-                    "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\nEach document contains `doc_id` and `doc_collection`. When you say something, refer to the document you are using in a format `{{'doc_id': '<id of the document>', 'doc_collection': '<collection of the document>'}}`.\nParts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
+                    "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n"
+                    + (
+                        f"Each document contains `doc_idx`. When you say something, refer to the document you are using in a format `{{'doc_idx': '<idx of the document>'}}`.\n"
+                        if api_version == ApiVersion.v2
+                        else f""
+                    )
+                    + f"Parts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
+                    # "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n" + (f"Each document contains `doc_id` and `doc_collection`. When you say something, refer to the document you are using in a format `{{'doc_id': '<id of the document>', 'doc_collection': '<collection of the document>'}}`.\n" if api_version == ApiVersion.v2 else f"")  + f"Parts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
                 }
             )
 
@@ -48,7 +55,9 @@ class OpenAICompletionModel(CompletionModel):
             )
         )
         answer = await openai.ChatCompletion.acreate(
-            model=self.model_name,
+            model=CONFIG["v1.completions"]["model"]
+            if api_version == ApiVersion.v1
+            else CONFIG["v2.completions"]["model"],
             messages=messages,
             temperature=0.4,
             max_tokens=300,

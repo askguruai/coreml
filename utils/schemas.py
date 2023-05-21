@@ -4,6 +4,11 @@ from typing import Dict, List, Literal
 from pydantic import BaseModel, Field, validator
 
 
+class ApiVersion(str, Enum):
+    v1 = "v1"
+    v2 = "v2"
+
+
 class HTTPExceptionResponse(BaseModel):
     detail: str = Field(example="Internal Server Error")
 

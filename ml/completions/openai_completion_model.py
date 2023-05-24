@@ -60,7 +60,7 @@ class OpenAICompletionModel(CompletionModel):
             else CONFIG["v2.completions"]["model"],
             messages=messages,
             temperature=0.4,
-            max_tokens=300,
+            max_tokens=500,
             stream=completions_input.stream,
         )
         if completions_input.stream:

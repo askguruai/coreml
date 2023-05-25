@@ -18,6 +18,7 @@ from utils import CONFIG
 from utils.api import catch_errors
 from utils.logging import run_uvicorn_loguru
 from utils.schemas import (
+    AnswerInContextResponse,
     ApiVersion,
     CompletionsInput,
     CompletionsResponse,
@@ -80,6 +81,19 @@ async def get_embeddings(api_version: ApiVersion, embeddings_input: EmbeddingsIn
 @catch_errors
 async def get_completions(api_version: ApiVersion, completions_input: CompletionsInput):
     return await openai_completion_model.get_completion(completions_input=completions_input, api_version=api_version)
+
+
+# check if answer is in the context
+@app.post(
+    "/{api_version}/if_answer_in_context/",
+    response_model=AnswerInContextResponse,
+    responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
+)
+@catch_errors
+async def if_answer_in_context(api_version: ApiVersion, completions_input: CompletionsInput):
+    return await openai_completion_model.if_answer_in_context(
+        completions_input=completions_input, api_version=api_version
+    )
 
 
 v2 = FastAPI()

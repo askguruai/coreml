@@ -7,6 +7,14 @@ from pydantic import BaseModel, Field, validator
 class ApiVersion(str, Enum):
     v1 = "v1"
     v2 = "v2"
+    v3 = "v3"
+
+
+class AnswerInContextResponse(BaseModel):
+    answer: bool = Field(
+        description="Whether the answer is in context.",
+        example=True,
+    )
 
 
 class HTTPExceptionResponse(BaseModel):

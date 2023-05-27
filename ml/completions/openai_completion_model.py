@@ -19,11 +19,13 @@ class OpenAICompletionModel(CompletionModel):
         messages = [
             {
                 "role": "system",
-                "content": "You are a classification AI. You tell 1 if the answer is in the context and 0 if it is not.",
+                # "content": "You are a classification AI. You tell 1 if the answer is in the context and 0 if it is not.",
+                "content": "You are a classification AI. You respond with a confidence score from 1 to 10. You are trying to predict if the answer is in the context.",
             },
             {
                 "role": "user",
-                "content": f"You are given some texts and a question. You need to tell if the answer to the question is in the texts.\nThe text might be relevant to the question, but the answer might not be in the text.\nYou should respond only with one symbol: 1 if answer to a given query contained in the provided text and 0 otherwise.\n\nText:\n\"\"\"\n"
+                # "content": f"You are given some texts and a question. You need to tell if the answer to the question is in the texts.\nThe text might be relevant to the question, but the answer might not be in the text.\nYou should respond only with one symbol: 1 if answer to a given query contained in the provided text and 0 otherwise.\n\nText:\n\"\"\"\n"
+                "content": f"You are given some texts and a question. You need to tell if the answer to the question is in the texts.\nThe text might be relevant to the question, but the answer might not be in the text.\nYou should respond with confidence score from 1 to 10 if answer to a given query contained in the text.\n\nText:\n\"\"\"\n"
                 + (completions_input.info or "")
                 + (completions_input.chat or "")
                 + "\n\n\"\"\"\nQuestion:\n\"\"\"\n"
@@ -44,10 +46,12 @@ class OpenAICompletionModel(CompletionModel):
             else CONFIG["v2.completions"]["model"],
             messages=messages,
             temperature=0.4,
-            max_tokens=3,
+            max_tokens=5,
         )
-        answer = bool(int(answer["choices"][0]["message"]["content"].lstrip()))
+        answer = int(answer["choices"][0]["message"]["content"].lstrip())
         logger.info("completions result:" + '\n' + str(answer))
+        answer = answer >= 5
+        # answer = bool(int(answer["choices"][0]["message"]["content"].lstrip()))
         return AnswerInContextResponse(answer=answer)
 
     async def get_completion(self, completions_input: CompletionsInput, api_version: ApiVersion) -> CompletionsResponse:

@@ -66,7 +66,10 @@ class OpenAICompletionModel(CompletionModel):
             messages.append(
                 {
                     "role": "user",
-                    "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n"
+                    "content": "You are a customer support agent. Reply in the first person on behalf of the company.\n"
+                    if completions_input.mode == "support"
+                    else ""
+                    + f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n"
                     + (
                         f"Each document contains `doc_idx`. When you say something, refer to the document you are using in a format `{{doc_idx: <idx of the document>}}`, e.g. {{doc_idx: 3}}.\n"
                         if api_version != ApiVersion.v1

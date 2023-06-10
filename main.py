@@ -16,7 +16,7 @@ from ml import EmbeddingModel
 from ml.completions import AlpacaCompletionModel, CompletionModel, OpenAICompletionModel, T5CompletionModel
 from utils import CONFIG
 from utils.api import catch_errors
-from utils.logging import run_uvicorn_loguru
+from utils.gunicorn_logging import run_gunicorn_loguru
 from utils.schemas import (
     AnswerInContextResponse,
     ApiVersion,
@@ -226,11 +226,9 @@ async def get_completions(completions_input: CompletionsInput):
 
 
 if __name__ == "__main__":
-    run_uvicorn_loguru(
-        uvicorn.Config(
-            "main:app",
-            host=CONFIG["app"]["host"],
-            port=int(CONFIG["app"]["port"]),
-            log_level=CONFIG["app"]["log_level"],
-        )
-    )
+    options = {
+        "bind": CONFIG["app"]["host"] + ':' + CONFIG["app"]["port"],
+        "workers": CONFIG["app"]["workers"],
+        "timeout": CONFIG["app"]["timeout"],
+    }
+    run_gunicorn_loguru(app, options)

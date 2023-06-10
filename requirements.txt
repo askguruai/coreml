@@ -11,3 +11,4 @@ InstructorEmbedding
 sentencepiece
 accelerate
 async-lru
+gunicorn

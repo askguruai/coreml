@@ -1,4 +1,3 @@
-import logging
 import threading
 import time
 from pprint import pformat
@@ -9,6 +8,7 @@ import uvicorn
 from async_lru import alru_cache
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
+from loguru import logger
 from torch import multiprocessing
 
 from data import EMBEDDING_INSTRUCTION
@@ -64,7 +64,7 @@ async def docs_redirect():
 @catch_errors
 @alru_cache(maxsize=512)
 async def get_embeddings(api_version: ApiVersion, embeddings_input: EmbeddingsInput):
-    logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
+    logger.info(f"Number of texts to embed: {len(embeddings_input.input)}")
     embeddings = (await openai.Embedding.acreate(input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]))[
         "data"
     ]
@@ -111,7 +111,7 @@ async def docs_redirect():
 )
 @catch_errors
 async def get_embeddings(embeddings_input: EmbeddingsInputInstruction):
-    logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
+    logger.info(f"Number of texts to embed: {len(embeddings_input.input)}")
     embeddings = embedding_model.get_embeddings(
         input=embeddings_input.input,
         instruction=embeddings_input.instruction if embeddings_input.instruction else EMBEDDING_INSTRUCTION,
@@ -148,7 +148,7 @@ async def docs_redirect():
 # )
 # @catch_errors
 # async def get_embeddings(embeddings_input: EmbeddingsInputInstruction):
-#     logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
+#     logger.info(f"Number of texts to embed: {len(embeddings_input.input)}")
 #     embeddings = embedding_model.get_embeddings(
 #         input=embeddings_input.input,
 #         instruction=embeddings_input.instruction
@@ -165,7 +165,7 @@ async def docs_redirect():
 )
 @catch_errors
 async def get_embeddings(embeddings_input: EmbeddingsInput):
-    logging.info(f"Number of texts to embed: {len(embeddings_input.input)}")
+    logger.info(f"Number of texts to embed: {len(embeddings_input.input)}")
     embeddings = openai.Embedding.create(input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"])["data"]
     embeddings = [embedding["embedding"] for embedding in embeddings]
     return EmbeddingsResponse(data=embeddings)
@@ -178,7 +178,7 @@ async def get_embeddings(embeddings_input: EmbeddingsInput):
 )
 @catch_errors
 async def get_completions(completions_input: CompletionsInput):
-    logging.info("Received completions request")
+    logger.info("Received completions request")
 
     state = manager.dict()
     for completion_model, context in zip(
@@ -195,7 +195,7 @@ async def get_completions(completions_input: CompletionsInput):
         # second job if first one is already finished
         thread = threading.Thread(target=job.start)
         thread.start()
-        logging.info(f"Started thread with job {job.name}")
+        logger.info(f"Started thread with job {job.name}")
 
     start = time.time()
     while time.time() - start < int(CONFIG["v3.completions"]["general_timeout"]):
@@ -205,7 +205,7 @@ async def get_completions(completions_input: CompletionsInput):
             break
         time.sleep(0.1)
 
-    logging.info(f"Finished in {round(time.time() - start, 2)} seconds with state {state}")
+    logger.info(f"Finished in {round(time.time() - start, 2)} seconds with state {state}")
 
     if not state:
         raise HTTPException(

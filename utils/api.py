@@ -1,7 +1,7 @@
-import logging
 from functools import wraps
 
 from fastapi import HTTPException, status
+from loguru import logger
 
 
 def catch_errors(func):
@@ -10,7 +10,7 @@ def catch_errors(func):
         try:
             return await func(*args, **kwargs)
         except Exception as e:
-            logging.error(f"{e.__class__.__name__}: {e}")
+            logger.error(f"{e.__class__.__name__}: {e}")
             if isinstance(e, HTTPException):
                 raise e
             raise HTTPException(

@@ -6,6 +6,7 @@ from loguru import logger
 
 from ml.completions import CompletionModel
 from utils import CONFIG
+from utils.misc import retry_with_time_limit
 from utils.schemas import AnswerInContextResponse, ApiVersion, CompletionsInput, CompletionsResponse
 
 
@@ -27,8 +28,12 @@ class OpenAICompletionModel(CompletionModel):
                 # "content": f"You are given some texts and a question. You need to tell if the answer to the question is in the texts.\nThe text might be relevant to the question, but the answer might not be in the text.\nYou should respond only with one symbol: 1 if answer to a given query contained in the provided text and 0 otherwise.\n\nText:\n\"\"\"\n"
                 "content": f"You are given some texts and a question. You need to tell if the answer to the question is in the texts.\nThe text might be relevant to the question, but the answer might not be in the text.\nYou should respond with confidence score from 1 to 10 if answer to a given query contained in the text.\n\nText:\n\"\"\"\n"
                 + (completions_input.info or "")
-                + (completions_input.chat or "")
-                + "\n\n\"\"\"\nQuestion:\n\"\"\"\n"
+                + (
+                    "\n".join([f"{msg['role']}: {msg['content']}" for msg in completions_input.chat])
+                    if completions_input.chat
+                    else ""
+                )
+                + "\n\n\"\"\"\n\n\nQuestion:\n\"\"\"\n"
                 + (completions_input.query or "")
                 + "\n\"\"\"",
             },
@@ -40,14 +45,15 @@ class OpenAICompletionModel(CompletionModel):
                 [f"{message['role']}: {message['content']}" for message in messages]
             )
         )
-        answer = await openai.ChatCompletion.acreate(
-            model=CONFIG["v1.completions"]["model"]
+        args = {
+            "model": CONFIG["v1.completions"]["model"]
             if api_version == ApiVersion.v1
             else CONFIG["v2.completions"]["model"],
-            messages=messages,
-            temperature=0.4,
-            max_tokens=5,
-        )
+            "messages": messages,
+            "temperature": 0.4,
+            "max_tokens": 5,
+        }
+        answer = await retry_with_time_limit(openai.ChatCompletion.acreate, time_limit=5, max_retries=3, **args)
         answer = int(answer["choices"][0]["message"]["content"].lstrip())
         logger.info("completions result:" + '\n' + str(answer))
         answer = answer >= 5
@@ -107,16 +113,22 @@ class OpenAICompletionModel(CompletionModel):
                 [f"{message['role']}: {message['content']}" for message in messages]
             )
         )
-        answer = await openai.ChatCompletion.acreate(
-            model=CONFIG["v1.completions"]["model"]
+        args = {
+            "model": CONFIG["v1.completions"]["model"]
             if api_version == ApiVersion.v1
             else CONFIG["v2.completions"]["model"],
-            messages=messages,
-            temperature=0.4,
-            max_tokens=500,
-            stream=completions_input.stream,
-        )
-        if completions_input.stream:
+            "messages": messages,
+            "temperature": 0.4,
+            "max_tokens": 500,
+            "stream": completions_input.stream,
+        }
+        if not completions_input.stream:
+            answer = await openai.ChatCompletion.acreate(**args)
+            answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
+            logger.info("completions result:" + '\n' + answer)
+            return CompletionsResponse(data=answer)
+        else:
+            answer = await retry_with_time_limit(openai.ChatCompletion.acreate, time_limit=4, max_retries=3, **args)
             answer = (
                 CompletionsResponse(
                     data=message["choices"][0]["delta"]["content"]
@@ -126,9 +138,6 @@ class OpenAICompletionModel(CompletionModel):
                 async for message in answer
             )
             return StreamingResponse(answer, media_type='text/event-stream', headers={'X-Accel-Buffering': 'no'})
-        answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
-        logger.info("completions result:" + '\n' + answer)
-        return CompletionsResponse(data=answer)
 
     @staticmethod
     def get_system_prompt(completions_input: CompletionsInput) -> str:

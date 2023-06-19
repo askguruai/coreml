@@ -52,6 +52,23 @@ class ChatRoles(str, Enum):
     assistant = "assistant"
 
 
+class SummarizationInput(BaseModel):
+    info: str = Field(
+        description="Information to be summarized. Size does not matter.",
+        example="Voters in Switzerland have backed a new climate bill designed to cut fossil fuel use and reach net-zero carbon emissions by 2050. The government says the country needs to protect its energy security and the environment, as glaciers melt rapidly in the Swiss Alps. The law will require a move away from dependence on imported oil and gas towards the use of renewable sources. In Sunday's referendum 59.1% of voters backed the green energy proposals. Opponents had argued the measures would push up energy prices. Nearly all of Switzerland's major parties supported the bill, except the right-wing Swiss People's Party (SVP), which triggered the referendum after pushing back against the government's proposals. Switzerland imports about three-quarters of its energy, with all the oil and natural gas consumed coming from abroad. The climate bill pledges financial support of 2bn Swiss francs ($2.2bn; £1.7bn) over a decade to promote the replacement of gas or oil heating systems with climate-friendly alternatives, and SFr1.2bn to push businesses towards green innovation.",
+    )
+    max_tokens: int = Field(
+        default=250,
+        description="Maximum number of tokens to generate.",
+        example=250,
+    )
+    stream: bool = Field(
+        default=False,
+        description="If true, the response will be streamed as it is generated. This is useful for long-running requests.",
+        example=False,
+    )
+
+
 class CompletionsInput(BaseModel):
     query: str = Field(description="A query to get an asnwer to.", example="Do you offer screen sharing chat?")
     info: str | None = Field(

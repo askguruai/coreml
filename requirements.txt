@@ -12,3 +12,4 @@ sentencepiece
 accelerate
 async-lru
 gunicorn
+tiktoken

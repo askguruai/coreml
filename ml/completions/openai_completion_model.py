@@ -1,18 +1,21 @@
+import asyncio
 from pprint import pformat
 
 import openai
+import tiktoken
 from fastapi.responses import StreamingResponse
 from loguru import logger
 
 from ml.completions import CompletionModel
 from utils import CONFIG
 from utils.misc import retry_with_time_limit
-from utils.schemas import AnswerInContextResponse, ApiVersion, CompletionsInput, CompletionsResponse
+from utils.schemas import AnswerInContextResponse, ApiVersion, CompletionsInput, CompletionsResponse, SummarizationInput
 
 
 class OpenAICompletionModel(CompletionModel):
     def __init__(self, model_name: str):
         self.model_name = model_name
+        self.enc = tiktoken.get_encoding("cl100k_base")
 
     async def if_answer_in_context(
         self, completions_input: CompletionsInput, api_version: ApiVersion
@@ -126,6 +129,56 @@ class OpenAICompletionModel(CompletionModel):
             answer = await openai.ChatCompletion.acreate(**args)
             answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
             logger.info("completions result:" + '\n' + answer)
+            return CompletionsResponse(data=answer)
+        else:
+            answer = await retry_with_time_limit(openai.ChatCompletion.acreate, time_limit=4, max_retries=3, **args)
+            answer = (
+                CompletionsResponse(
+                    data=message["choices"][0]["delta"]["content"]
+                    if "content" in message["choices"][0]["delta"]
+                    else ""
+                ).json()
+                async for message in answer
+            )
+            return StreamingResponse(answer, media_type='text/event-stream', headers={'X-Accel-Buffering': 'no'})
+
+    async def get_summarization(
+        self, summarization_input: SummarizationInput, api_version: ApiVersion
+    ) -> CompletionsResponse:
+        prompt = (
+            lambda text: f"Can you provide a comprehensive summary of the given text? The summary should cover all the key points and main ideas presented in the original text, while also condensing the information into a concise and easy-to-understand format. Please ensure that the summary includes relevant details and examples that support the main ideas, while avoiding any unnecessary information or repetition. The length of the summary should be appropriate for the length and complexity of the original text, providing a clear and accurate overview without omitting any important information.\n\nText:\n\"\"\"\n{text}\n\"\"\""
+        )
+        max_request_size = 15_000
+        args = {
+            "model": "gpt-3.5-turbo-16k",
+            "temperature": 0.6,
+            "max_tokens": summarization_input.max_tokens,
+        }
+        text, length = summarization_input.info, len(self.enc.encode(summarization_input.info))
+        while length > max_request_size:
+            logger.warning(f"Splitting summarization request into {length // max_request_size + 1} parts")
+            n_parts = length // max_request_size + 1
+            tasks = []
+            for i in range(n_parts):
+                start = i * length // n_parts
+                end = (i + 1) * length // n_parts
+                tasks.append(
+                    openai.ChatCompletion.acreate(
+                        messages=[{"role": "user", "content": prompt(text[start:end])}],
+                        **args,
+                    )
+                )
+            results = await asyncio.gather(*tasks)
+            text = "".join(
+                [self.postprocess_output(result["choices"][0]["message"]["content"].lstrip()) for result in results]
+            )
+            length = len(self.enc.encode(text))
+
+        args["messages"] = [{"role": "user", "content": prompt(text)}]
+        args["stream"] = summarization_input.stream
+        if not summarization_input.stream:
+            answer = await openai.ChatCompletion.acreate(**args)
+            answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
             return CompletionsResponse(data=answer)
         else:
             answer = await retry_with_time_limit(openai.ChatCompletion.acreate, time_limit=4, max_retries=3, **args)

@@ -26,6 +26,7 @@ from utils.schemas import (
     EmbeddingsInputInstruction,
     EmbeddingsResponse,
     HTTPExceptionResponse,
+    SummarizationInput,
 )
 
 app = FastAPI()
@@ -81,6 +82,18 @@ async def get_embeddings(api_version: ApiVersion, embeddings_input: EmbeddingsIn
 @catch_errors
 async def get_completions(api_version: ApiVersion, completions_input: CompletionsInput):
     return await openai_completion_model.get_completion(completions_input=completions_input, api_version=api_version)
+
+
+@app.post(
+    "/{api_version}/summarization/",
+    response_model=CompletionsResponse,
+    responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
+)
+@catch_errors
+async def get_completions(api_version: ApiVersion, summarization_input: SummarizationInput):
+    return await openai_completion_model.get_summarization(
+        summarization_input=summarization_input, api_version=api_version
+    )
 
 
 # check if answer is in the context

@@ -17,6 +17,7 @@ from ml.completions import AlpacaCompletionModel, CompletionModel, OpenAIComplet
 from utils import CONFIG
 from utils.api import catch_errors
 from utils.gunicorn_logging import run_gunicorn_loguru
+from utils.misc import retry_with_time_limit
 from utils.schemas import (
     AnswerInContextResponse,
     ApiVersion,
@@ -66,10 +67,15 @@ async def docs_redirect():
 @alru_cache(maxsize=512)
 async def get_embeddings(api_version: ApiVersion, embeddings_input: EmbeddingsInput):
     logger.info(f"Number of texts to embed: {len(embeddings_input.input)}")
-    embeddings = (await openai.Embedding.acreate(input=embeddings_input.input, model=CONFIG["v1.embeddings"]["model"]))[
-        "data"
-    ]
-    embeddings = [embedding["embedding"] for embedding in embeddings]
+    args = {
+        "input": embeddings_input.input,
+        "model": CONFIG["v1.embeddings"]["model"],
+    }
+    if len(embeddings_input.input) == 1:
+        embeddings = await retry_with_time_limit(openai.Embedding.acreate, time_limit=2, max_retries=10, **args)
+    else:
+        embeddings = await openai.Embedding.acreate(**args)
+    embeddings = [embedding["embedding"] for embedding in embeddings["data"]]
     return EmbeddingsResponse(data=embeddings)
 
 

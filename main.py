@@ -75,8 +75,18 @@ async def get_embeddings(api_version: ApiVersion, embeddings_input: EmbeddingsIn
         embeddings = await retry_with_time_limit(openai.Embedding.acreate, time_limit=2, max_retries=10, **args)
     else:
         embeddings = await openai.Embedding.acreate(**args)
-    embeddings = [embedding["embedding"] for embedding in embeddings["data"]]
-    return EmbeddingsResponse(data=embeddings)
+    embeddings_final = []
+    for i, embedding_object in enumerate(embeddings["data"]):
+        embedding = embedding_object["embedding"]
+        while len(embedding) == 1:
+            logger.warning(f"Faced embedding of length 1 on place {i}. Retrying with a single failed chunk...")
+            args["input"] = [embeddings_input.input[i]]
+            embedding = (await retry_with_time_limit(openai.Embedding.acreate, time_limit=2, max_retries=10, **args))[
+                "data"
+            ][0]["embedding"]
+            logger.warning(f"After retrying received embedding of size {len(embedding)}")
+        embeddings_final.append(embedding)
+    return EmbeddingsResponse(data=embeddings_final)
 
 
 # @alru_cache(maxsize=512)

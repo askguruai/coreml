@@ -199,6 +199,6 @@ class OpenAICompletionModel(CompletionModel):
             case "general":
                 prompt += "You are helpful AskGuru assistant which follows given instructions and is seeking to answer a user's question in a language it was asked."
             case "support":
-                prompt += "You are an AI which acts as a customer support agent who is seeking to provide a complete, simple, helpful AND TRUTHFUL answer to a customer.\nIn your answer do not refer to customer support because you ARE customer support."
+                prompt += "You are a customer support agent who is seeking to provide a complete, simple, helpful and truthful answer to a customer. Reply with only answer to a query and nothing else."
 
         return prompt

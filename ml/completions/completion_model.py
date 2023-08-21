@@ -14,4 +14,6 @@ class CompletionModel:
 
     @staticmethod
     def postprocess_output(s: str) -> str:
-        return s[: max(s.rfind("."), s.rfind("?"), s.rfind("!"), s.rfind("\n")) + 1]
+        # Try to cut the answer off by some of the symbols (including symbol).
+        # If unsuccessfull (e.g. s = "Two") then take full string.
+        return s[: (max(s.rfind("."), s.rfind("?"), s.rfind("!"), s.rfind("\n")) + 1) or len(s)]

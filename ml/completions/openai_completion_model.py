@@ -99,9 +99,9 @@ class OpenAICompletionModel(CompletionModel):
             )
 
         if completions_input.chat:
-            messages += completions_input.chat
+            messages += [msg.dict() for msg in completions_input.chat]
 
-        if completions_input.query:
+        if completions_input.query and not completions_input.chat:
             messages.append(
                 {
                     "role": "user",

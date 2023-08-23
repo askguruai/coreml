@@ -47,11 +47,6 @@ class CompletionsMode(str, Enum):
     support = "support"
 
 
-class ChatRoles(str, Enum):
-    user = "user"
-    assistant = "assistant"
-
-
 class SummarizationInput(BaseModel):
     info: str = Field(
         description="Information to be summarized. Size does not matter.",
@@ -69,6 +64,16 @@ class SummarizationInput(BaseModel):
     )
 
 
+class Role(str, Enum):
+    user = 'user'
+    assistant = 'assistant'
+
+
+class Message(BaseModel):
+    role: Role = Field(description="Role of the user", example=Role.user)
+    content: str = Field(description="Content of the message", example="How to fix income mail view?")
+
+
 class CompletionsInput(BaseModel):
     query: str = Field(description="A query to get an asnwer to.", example="Do you offer screen sharing chat?")
     info: str | None = Field(
@@ -76,7 +81,7 @@ class CompletionsInput(BaseModel):
         description="Information to use for answering the query. If not provided, the query will be answered without any context.",
         example="Available options: Teamviewer and join.me",
     )
-    chat: List[Dict[Literal["role", "content"], str]] | None = Field(
+    chat: List[Message] | None = Field(
         default=None,
         description="Chat history from communication between user and agent.",
         example=[
@@ -96,16 +101,10 @@ class CompletionsInput(BaseModel):
         description="If true, the response will be streamed as it is generated. This is useful for long-running requests.",
     )
 
-    @validator("chat", each_item=True)
-    def validate_chat_author(cls, v):
-        if v["role"] not in [role.value for role in ChatRoles]:
-            raise ValueError(f"Role must be one of {', '.join([role.value for role in ChatRoles])}")
-        return v
-
     def __hash__(self):
         # to fasten the hash of chat history, only the first and last message are considered
         # chat_hashable = None if not self.chat else tuple((self.chat[idx]["role"], self.chat[idx]["content"]) for idx in [0, -1])
-        chat_hashable = None if not self.chat else tuple((msg["role"], msg["content"]) for msg in self.chat)
+        chat_hashable = None if not self.chat else tuple((msg.role, msg.content) for msg in self.chat)
         return hash((self.query, self.info, chat_hashable, self.mode))
 
 

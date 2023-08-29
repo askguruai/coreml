@@ -100,10 +100,7 @@ class CompletionsInput(BaseModel):
         default=False,
         description="If true, the response will be streamed as it is generated. This is useful for long-running requests.",
     )
-    include_image_urls: bool | None = Field(
-        default=False,
-        description="If include image urls in the output answer"
-    )
+    include_image_urls: bool | None = Field(default=False, description="If include image urls in the output answer")
 
     def __hash__(self):
         # to fasten the hash of chat history, only the first and last message are considered

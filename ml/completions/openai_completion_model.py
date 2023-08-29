@@ -67,52 +67,26 @@ class OpenAICompletionModel(CompletionModel):
         messages = [
             {
                 "role": "system",
-                "content": self.get_system_prompt(completions_input),
+                "content": ("You will be provided with a several documents delimited by triple quotes and a question. Your task is to answer the question using only the provided document and to cite the passage(s) of the document used to answer the question. If the document does not contain the information needed to answer this question then simply write: \"I couldn't find an answer in the knowledge base.\". If an answer to the question is provided, it must be annotated with a citation. Use the following format for to cite relevant passages `{doc_idx: <idx of the document>}`, e.g. {doc_idx: 3}`." if not completions_input.include_images else "You will be provided with a several documents delimited by triple quotes and a question. Your task is to answer the question using provided documents.") + " If there is a link to an image like 'https://example.com/image.png' in the document then include it in the answer in a markdown format."
             },
         ]
 
-        if completions_input.info:
-            messages.append(
-                {
-                    "role": "user",
-                    "content": (
-                        "You are a customer support agent. Reply in the first person on behalf of the company.\n"
-                        if completions_input.mode == "support"
-                        else ""
-                    )
-                    + f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n"
-                    + (
-                        f"Each document contains `doc_idx`. When you say something, refer to the document you are using in a format `{{doc_idx: <idx of the document>}}`, e.g. {{doc_idx: 3}}.\n"
-                        if api_version != ApiVersion.v1
-                        else f""
-                    )
-                    + f"Parts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
-                    # "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n" + (f"Each document contains `doc_id` and `doc_collection`. When you say something, refer to the document you are using in a format `{{'doc_id': '<id of the document>', 'doc_collection': '<collection of the document>'}}`.\n" if api_version == ApiVersion.v2 else f"")  + f"Parts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
-                }
-            )
-        else:
-            messages.append(
-                {
-                    "role": "user",
-                    "content": "Provide a simple and detailed answer to a question in a language it was asked",
-                }
-            )
-
         if completions_input.chat:
             messages += [msg.dict() for msg in completions_input.chat]
+            messages[-1]["content"] = f"\"\"\"\n{completions_input.info}\n\"\"\"" + f"\n\nQuestion: {messages[-1]['content']}"
 
         if completions_input.query and not completions_input.chat:
             messages.append(
                 {
                     "role": "user",
-                    "content": completions_input.query + "\nIf there is a link to an image give me that in a markdown format.",
+                    "content": f"\"\"\"\n{completions_input.info}\n\"\"\"" + f"\n\nQuestion: {completions_input.query}"
                 }
             )
 
         logger.info(
             "completions request:"
             + '\n'
-            + '\n=============================\n'.join(
+            + '\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n'.join(
                 [f"{message['role']}: {message['content']}" for message in messages]
             )
         )

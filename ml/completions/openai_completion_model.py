@@ -121,13 +121,13 @@ class OpenAICompletionModel(CompletionModel):
             if api_version == ApiVersion.v1
             else CONFIG["v2.completions"]["model"],
             "messages": messages,
-            "temperature": 0.4,
-            "max_tokens": 600,
+            "temperature": 0.0,
+            "max_tokens": 500,
             "stream": completions_input.stream,
         }
         if not completions_input.stream:
             answer = await openai.ChatCompletion.acreate(**args)
-            answer = self.postprocess_output(answer["choices"][0]["message"]["content"].lstrip())
+            answer = self.postprocess_output(answer["choices"][0]["message"]["content"].strip())
             logger.info("completions result:" + '\n' + answer)
             return CompletionsResponse(data=answer)
         else:

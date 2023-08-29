@@ -90,7 +90,6 @@ class OpenAICompletionModel(CompletionModel):
                     # "content": f"You are given the parts of the documents from a knowledge base and a question, compile a final answer.\nIn your answer, use only provided parts of the document.\nIf you don't know the answer, just say that you were unable to find an answer in the knowledge base.\nDon't try to make up an answer.\n\n" + (f"Each document contains `doc_id` and `doc_collection`. When you say something, refer to the document you are using in a format `{{'doc_id': '<id of the document>', 'doc_collection': '<collection of the document>'}}`.\n" if api_version == ApiVersion.v2 else f"")  + f"Parts of the documents:\n\"\"\"\n{completions_input.info}\n\"\"\"",
                 }
             )
-            messages.append({"role": "user", "content": f"Use URLs to image files from document in your answer if needed in a markdown format, like [](https://example.com/image.png)."})
         else:
             messages.append(
                 {
@@ -106,7 +105,7 @@ class OpenAICompletionModel(CompletionModel):
             messages.append(
                 {
                     "role": "user",
-                    "content": completions_input.query,
+                    "content": completions_input.query + "\nIf there is a link to an image give me that in a markdown format.",
                 }
             )
 

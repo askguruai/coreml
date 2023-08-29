@@ -100,7 +100,7 @@ class CompletionsInput(BaseModel):
         default=False,
         description="If true, the response will be streamed as it is generated. This is useful for long-running requests.",
     )
-    include_images: bool | None = Field(
+    include_image_urls: bool | None = Field(
         default=False,
         description="If include image urls in the output answer"
     )

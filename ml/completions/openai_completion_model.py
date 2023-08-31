@@ -97,8 +97,10 @@ class OpenAICompletionModel(CompletionModel):
             else CONFIG["v2.completions"]["model"],
             "messages": messages,
             "temperature": 0.0,
-            "max_tokens": 500,
+            "max_tokens": 400,
             "stream": completions_input.stream,
+            "frequency_penalty": 1.0,
+            "presence_penalty": 1.0,
         }
         if not completions_input.stream:
             answer = await openai.ChatCompletion.acreate(**args)

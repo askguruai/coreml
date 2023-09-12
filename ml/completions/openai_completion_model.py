@@ -77,6 +77,11 @@ class OpenAICompletionModel(CompletionModel):
                     if completions_input.include_image_urls
                     else ""
                 )
+                + (
+                    "Use **bold syntaxis** to **highlight phrases** in each and every sentence of your answer."
+                    if completions_input.apply_formatting
+                    else ""
+                )
                 # "content": ("You will be provided with a several documents delimited by triple quotes and a question. Your task is to answer the question using only the provided document and to cite the passage(s) of the document used to answer the question. If the document does not contain the information needed to answer this question then simply write: \"I couldn't find an answer in the knowledge base.\". If an answer to the question is provided, it must be annotated with a citation. Use the following format for to cite relevant passages `{doc_idx: <idx of the document>}`, e.g. {doc_idx: 3}`." if not completions_input.include_image_urls else "You will be provided with a several documents delimited by triple quotes and a question. Your task is to answer the question using provided documents.") + " If there is a link to an image like 'https://example.com/image.png' in the document then include it in the answer in a markdown format."
             },
         ]

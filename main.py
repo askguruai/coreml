@@ -143,7 +143,7 @@ async def speech2text(file: UploadFile = File(...)):
         audio = open(osp.join(tmpdir, file.filename), "rb")
         # todo: split audio chunks?
         args = {"model": "whisper-1", "file": audio}
-        transcription = await retry_with_time_limit(openai.Audio.atranscribe, time_limit=4, max_retries=3, **args)
+        transcription = await retry_with_time_limit(openai.Audio.atranscribe, time_limit=6, max_retries=3, **args)
     return SpeechToTextResponse(data=transcription["text"])
 
 

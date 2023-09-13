@@ -1,12 +1,14 @@
+import os.path as osp
 import threading
 import time
 from pprint import pformat
+from tempfile import TemporaryDirectory
 from typing import List
 
 import openai
 import uvicorn
 from async_lru import alru_cache
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, File, HTTPException, UploadFile, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
 from torch import multiprocessing
@@ -27,6 +29,7 @@ from utils.schemas import (
     EmbeddingsInputInstruction,
     EmbeddingsResponse,
     HTTPExceptionResponse,
+    SpeechToTextResponse,
     SummarizationInput,
 )
 
@@ -123,6 +126,25 @@ async def if_answer_in_context(api_version: ApiVersion, completions_input: Compl
     return await openai_completion_model.if_answer_in_context(
         completions_input=completions_input, api_version=api_version
     )
+
+
+@app.post(
+    "/{api_version}/speech2text/",
+    response_model=SpeechToTextResponse,
+    responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
+)
+@catch_errors
+async def speech2text(file: UploadFile = File(...)):
+    with TemporaryDirectory() as tmpdir:
+        contents = await file.read()
+        print("Filename", file.filename)
+        with open(osp.join(tmpdir, file.filename), "wb") as f:
+            f.write(contents)
+        audio = open(osp.join(tmpdir, file.filename), "rb")
+        # todo: split audio chunks?
+        args = {"model": "whisper-1", "file": audio}
+        transcription = await retry_with_time_limit(openai.Audio.atranscribe, time_limit=6, max_retries=3, **args)
+    return SpeechToTextResponse(data=transcription["text"])
 
 
 v2 = FastAPI()

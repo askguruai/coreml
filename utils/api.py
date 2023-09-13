@@ -1,3 +1,4 @@
+import traceback
 from functools import wraps
 
 from fastapi import HTTPException, status
@@ -11,6 +12,7 @@ def catch_errors(func):
             return await func(*args, **kwargs)
         except Exception as e:
             logger.error(f"{e.__class__.__name__}: {e}")
+            traceback.print_exc()
             if isinstance(e, HTTPException):
                 raise e
             raise HTTPException(

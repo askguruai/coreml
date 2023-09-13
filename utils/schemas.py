@@ -115,3 +115,7 @@ class CompletionsResponse(BaseModel):
         description="Response to the given info and query.",
         example="I used to play drums.",
     )
+
+
+class SpeechToTextResponse(BaseModel):
+    data: str = Field(description="Transcribed text")

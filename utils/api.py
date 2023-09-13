@@ -1,8 +1,8 @@
+import traceback
 from functools import wraps
 
 from fastapi import HTTPException, status
 from loguru import logger
-import traceback
 
 
 def catch_errors(func):

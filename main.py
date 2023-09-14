@@ -129,7 +129,7 @@ async def if_answer_in_context(api_version: ApiVersion, completions_input: Compl
 
 
 @app.post(
-    "/{api_version}/speech2text/",
+    "/{api_version}/transcribe/",
     response_model=SpeechToTextResponse,
     responses={status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": HTTPExceptionResponse}},
 )

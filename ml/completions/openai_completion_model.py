@@ -117,6 +117,13 @@ class OpenAICompletionModel(CompletionModel):
             "stream": completions_input.stream,
             "frequency_penalty": 1.0,
             "presence_penalty": 1.0,
+            "logit_bias": {
+                "29815": -100,  # Based
+                "31039": -100,  # based
+                "3984": -100,  # provided
+                "9477": -100,  # documents
+                "2246": -100,  # documents
+            },
         }
         if not completions_input.stream:
             answer = await openai.ChatCompletion.acreate(**args)
